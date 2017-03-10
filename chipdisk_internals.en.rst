@@ -26,7 +26,7 @@ Okay, let's start. Playing a sid on a Commodore 64 is very simple:
         lda #<irq_vector    ; Set IRQ vector to be called
         sta $0314           ; Once per screen refresh
         lda #>irq_vector
-        sta $0315           ; The $ 314 / $ 315 vector points to the IRQ raster routine
+        sta $0315           ; The $314 / $315 vector points to the IRQ raster routine
 
         lda #$00
         jsr $1000           ; Initialize sid to play song 0
@@ -43,9 +43,9 @@ Okay, let's start. Playing a sid on a Commodore 64 is very simple:
         jmp $ea31           ; Exit interrupt
 
 ...and done. Each sid knows how to play all by itself, since a sid is code + data.
-The call `` jsr $ 1003`` does all the magic, and that code is inside of sid.
+The call ``jsr $1003`` does all the magic, and that code is inside of sid.
 
-The complicated thing about making a Chipdisk, is not touching the sid, but everything
+The complicated thing about making Chipdisk, is not playing the sid, but everything
 else. Let's see why.
 
 
@@ -75,11 +75,11 @@ The full 64k of free RAM.
 
 To turn these things on / off, use the address `$01`_
 
-In the Chipdisk we use two configurations:
+In Chipdisk we use two configurations:
 
 -  All RAM except ``$d000 - $dfff`` (area reserved for IO:
    VIC / SID / CIA): it is always used, except with
-   the sids decompressed
+   the sid decompression
 -  All RAM (64k free RAM): Used when the sids are decompressed
 
 It is used like this:
@@ -100,14 +100,14 @@ It is used like this:
                                 ; D000-DFFF: IO (VIC,SID,CIA)
                                 ; E000-FFFF: RAM
 
-        lda #$34                ; Used by the Chipdisk when it decompresses
+        lda #$34                ; Used by Chipdisk when it decompresses
         sta $01                 ; 0000-9FFF: RAM
                                 ; A000-BFFF: RAM
                                 ; C000-CFFF: RAM
                                 ; D000-DFFF: RAM
                                 ; E000-FFFF: RAM
 
-There are several possible combinations. Go here for more info `<http://unusedino.de/ec64/technical/aay/c64/zp01.htm>`__
+There are several possible combinations. Go here for `more info <http://unusedino.de/ec64/technical/aay/c64/zp01.htm>`__
 
 The other thing, is that the VIC (the *GPU*) needs the RAM as well.
 If we want to draw a bitmap graphic, we put the graphic in RAM and
@@ -115,7 +115,7 @@ The VIC reads it from there (from RAM). So the RAM is shared between the CPU (th
 and the GPU (the VIC).
 
 But there is a limitation: The VIC can only see 16k at a time of the 64k RAM.
-There are 4 banks of 16k each (`` 64k / 16k == 4``) of which the VIC can
+There are 4 banks of 16k each (``64k / 16k == 4``) of which the VIC can
 read the data.
 
 - Bank 0: ``$0000 - $3fff``
@@ -129,7 +129,7 @@ in another. It has to all be in one bank.
 That is not all. It can not be anywhere in the bank. There are places
 special to put bitmaps, charset and screen RAM.
 
-And that adds to other limitations not discussed here. To tell the
+That adds to other limitations not discussed here. To tell the
 VIC which bank to use is done through the registry `$dd00`_ of CIA 2, like this:
 
 .. code:: asm
@@ -179,7 +179,7 @@ Sids, Exomizer, and others
 ---------------------------
 
 How much RAM do we need for Chipdisk? Let's figure it out.
-The Chipdisk is composed of 3 modules:
+Chipdisk is composed of 3 modules:
 
 -  Intro: Half graphic multi-color + half screen PETSCII + charset +
    code
@@ -330,7 +330,7 @@ seconds. Let's see how it is done:
     delay:
             .byte 1
 
-And the sprites pointers are from ``$63f8`` to ``$63ff`` since it is being used
+And the sprites pointers are from ``$63f8`` to ``$63ff`` since we are using 
 Bank 1 (``$4000-$7fff``) and we told the VIC that the Screen will be in
 ``$6000``.
 
@@ -348,8 +348,8 @@ This idea is used a lot. Games like Bruce Lee (and hundreds of others) use it.
 The only drawback is that it uses 2 sprites instead of one.
 
 Another trick we use is to fix bitmap bugs with sprites. Remember
-That the cells in the bitmap can not have more than 2 colors. And to solve
-some pixels that look bad, we cover them with sprites.
+that the cells in the bitmap can not have more than 2 colors. And to fix
+pixels that look bad we cover them with sprites.
 
 And that's all about the Player Sprites.
 
@@ -424,7 +424,7 @@ cassette:
             .byte 5
 
 Once the sid is decompressed, the frequency table must be modified
-So it sounds the same in PAL, NTSC and Drean (PAL-N).
+so it sounds the same in PAL, NTSC and Drean (PAL-N).
 
 For that, you have to go to each sid and look where
 the table of frequencies are for each one.
@@ -683,7 +683,7 @@ to NTSC is:
 
 And to convert to Drean is similar:
 
--  `` ((speed_of_timer + 1) * 1023440/985248) - 1``
+-  ``((speed_of_timer + 1) * 1023440/985248) - 1``
 
 *Note*: ``985248``, ``1022727``, ``1023440`` are the speeds of the 6510
 In a PAL, NTSC, Drean respectively (``0.985248`` Mhz, ``1.022727``
@@ -752,7 +752,7 @@ NTSC.
 
 The trick works like this:
 
-- I wait for the raster to be on line 0 (read `$d012`_)
+- I wait for the raster to be on line 0 (read ``$d012``_)
 - Once it's there, I fire the CIA timer with ``$4cc7``
 - When the timer calls me, it will have given just one whole loop and `$d012`_
   will be 0, for a PAL machine.
